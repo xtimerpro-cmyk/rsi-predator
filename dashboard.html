@@ -3,769 +3,214 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RSI PREDATOR — GM Capital</title>
+<title>RSI DIVERGENCE PREDATOR — Powered by GM Capital</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg-primary: #0a0a0f;
-    --bg-secondary: #0f1018;
-    --bg-tertiary: #151520;
-    --bg-card: #12121c;
-    --bg-hover: #1a1a2e;
-    --border: #1e1e30;
-    --border-active: #2a2a45;
-    --text-primary: #e8e8f0;
-    --text-secondary: #8888a0;
-    --text-muted: #55556a;
-    --accent-green: #00e676;
-    --accent-green-dim: #00e67633;
-    --accent-red: #ff3d5a;
-    --accent-red-dim: #ff3d5a33;
-    --accent-amber: #ffab00;
-    --accent-amber-dim: #ffab0033;
-    --accent-blue: #448aff;
-    --accent-blue-dim: #448aff33;
-    --accent-cyan: #18ffff;
-    --accent-purple: #7c4dff;
-    --glow-green: 0 0 20px #00e67644;
-    --glow-red: 0 0 20px #ff3d5a44;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    font-family: 'JetBrains Mono', monospace;
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    overflow-x: hidden;
-    min-height: 100vh;
-  }
-
-  /* === SCANLINES OVERLAY === */
-  body::before {
-    content: '';
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.03) 2px,
-      rgba(0,0,0,0.03) 4px
-    );
-    pointer-events: none;
-    z-index: 9999;
-  }
-
-  /* === TOP BAR === */
-  .topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 24px;
-    height: 48px;
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  .topbar-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .logo {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 900;
-    font-size: 14px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--accent-cyan);
-    text-shadow: 0 0 10px rgba(24, 255, 255, 0.3);
-  }
-
-  .logo span {
-    color: var(--text-muted);
-    font-weight: 400;
-    letter-spacing: 1px;
-    margin-left: 8px;
-    font-size: 11px;
-  }
-
-  .topbar-divider {
-    width: 1px;
-    height: 24px;
-    background: var(--border);
-  }
-
-  .system-status {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 10px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-
-  .status-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--accent-green);
-    box-shadow: var(--glow-green);
-    animation: pulse-dot 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse-dot {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-
-  .topbar-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    font-size: 11px;
-    color: var(--text-secondary);
-  }
-
-  .clock {
-    font-variant-numeric: tabular-nums;
-    color: var(--text-primary);
-    font-weight: 500;
-  }
-
-  /* === STATS RIBBON === */
-  .ribbon {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    padding: 0;
-    height: 36px;
-    background: var(--bg-tertiary);
-    border-bottom: 1px solid var(--border);
-    overflow: hidden;
-  }
-
-  .ribbon-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0 20px;
-    height: 100%;
-    border-right: 1px solid var(--border);
-    font-size: 11px;
-    white-space: nowrap;
-  }
-
-  .ribbon-label {
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-size: 9px;
-  }
-
-  .ribbon-value {
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .ribbon-value.green { color: var(--accent-green); }
-  .ribbon-value.red { color: var(--accent-red); }
-  .ribbon-value.amber { color: var(--accent-amber); }
-  .ribbon-value.blue { color: var(--accent-blue); }
-
-  /* === MAIN GRID === */
-  .main {
-    display: grid;
-    grid-template-columns: 280px 1fr 320px;
-    grid-template-rows: 1fr;
-    height: calc(100vh - 84px);
-    gap: 1px;
-    background: var(--border);
-  }
-
-  /* === LEFT PANEL - FILTERS === */
-  .panel-left {
-    background: var(--bg-secondary);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  .panel-header {
-    padding: 16px;
-    border-bottom: 1px solid var(--border);
-    font-family: 'Outfit', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .filter-section {
-    padding: 16px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .filter-label {
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--text-muted);
-    margin-bottom: 10px;
-  }
-
-  .filter-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  .filter-btn {
-    padding: 5px 10px;
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    background: transparent;
-    color: var(--text-secondary);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    cursor: pointer;
-    transition: all 0.15s;
-    letter-spacing: 0.5px;
-  }
-
-  .filter-btn:hover {
-    border-color: var(--border-active);
-    color: var(--text-primary);
-    background: var(--bg-hover);
-  }
-
-  .filter-btn.active {
-    border-color: var(--accent-cyan);
-    color: var(--accent-cyan);
-    background: rgba(24, 255, 255, 0.05);
-  }
-
-  .filter-btn.green.active { border-color: var(--accent-green); color: var(--accent-green); background: var(--accent-green-dim); }
-  .filter-btn.red.active { border-color: var(--accent-red); color: var(--accent-red); background: var(--accent-red-dim); }
-  .filter-btn.amber.active { border-color: var(--accent-amber); color: var(--accent-amber); background: var(--accent-amber-dim); }
-
-  .search-input {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-
-  .search-input:focus {
-    border-color: var(--accent-cyan);
-  }
-
-  .search-input::placeholder {
-    color: var(--text-muted);
-  }
-
-  /* RSI Gauge */
-  .rsi-range {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 8px;
-  }
-
-  .rsi-range input[type="range"] {
-    flex: 1;
-    -webkit-appearance: none;
-    height: 3px;
-    background: var(--border);
-    border-radius: 2px;
-    outline: none;
-  }
-
-  .rsi-range input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--accent-cyan);
-    cursor: pointer;
-    box-shadow: 0 0 6px rgba(24, 255, 255, 0.4);
-  }
-
-  .rsi-val {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--accent-cyan);
-    min-width: 28px;
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* === CENTER PANEL - TABLE === */
-  .panel-center {
-    background: var(--bg-primary);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  .table-container {
-    flex: 1;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border-active) transparent;
-  }
-
-  .table-container::-webkit-scrollbar { width: 6px; }
-  .table-container::-webkit-scrollbar-track { background: transparent; }
-  .table-container::-webkit-scrollbar-thumb { background: var(--border-active); border-radius: 3px; }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 11px;
-  }
-
-  thead {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-
-  thead th {
-    padding: 10px 12px;
-    text-align: left;
-    font-size: 9px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--text-muted);
-    background: var(--bg-tertiary);
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-    white-space: nowrap;
-    user-select: none;
-    transition: color 0.15s;
-  }
-
-  thead th:hover { color: var(--text-primary); }
-  thead th.sorted { color: var(--accent-cyan); }
-
-  tbody tr {
-    border-bottom: 1px solid var(--border);
-    transition: background 0.1s;
-    cursor: pointer;
-  }
-
-  tbody tr:hover {
-    background: var(--bg-hover);
-  }
-
-  tbody tr.selected {
-    background: rgba(24, 255, 255, 0.03);
-    border-left: 2px solid var(--accent-cyan);
-  }
-
-  tbody td {
-    padding: 10px 12px;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-  }
-
-  .ticker-cell {
-    font-weight: 700;
-    font-family: 'Outfit', sans-serif;
-    font-size: 12px;
-    letter-spacing: 0.5px;
-  }
-
-  .exchange-tag {
-    font-size: 8px;
-    padding: 2px 5px;
-    border-radius: 2px;
-    margin-left: 6px;
-    font-weight: 500;
-    letter-spacing: 1px;
-    vertical-align: middle;
-  }
-
-  .exchange-tag.us { background: var(--accent-blue-dim); color: var(--accent-blue); }
-  .exchange-tag.pa { background: var(--accent-purple); color: white; opacity: 0.7; }
-
-  .div-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 3px 8px;
-    border-radius: 3px;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-  }
-
-  .div-badge.bullish { background: var(--accent-green-dim); color: var(--accent-green); }
-  .div-badge.bearish { background: var(--accent-red-dim); color: var(--accent-red); }
-  .div-badge.flat { border: 1px dashed; opacity: 0.7; }
-
-  .status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 3px 8px;
-    border-radius: 3px;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-  }
-
-  .status-badge.detected { background: var(--accent-amber-dim); color: var(--accent-amber); }
-  .status-badge.confirmed { background: var(--accent-green-dim); color: var(--accent-green); }
-  .status-badge.expired { background: rgba(85,85,106,0.2); color: var(--text-muted); }
-
-  .rsi-cell {
-    position: relative;
-  }
-
-  .rsi-bar {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    height: 2px;
-    border-radius: 1px;
-    transition: width 0.3s;
-  }
-
-  .rsi-bar.low { background: var(--accent-green); }
-  .rsi-bar.mid { background: var(--accent-amber); }
-  .rsi-bar.high { background: var(--accent-red); }
-
-  .price-change.up { color: var(--accent-green); }
-  .price-change.down { color: var(--accent-red); }
-
-  /* === RIGHT PANEL - DETAIL === */
-  .panel-right {
-    background: var(--bg-secondary);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  .detail-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: var(--text-muted);
-    font-size: 11px;
-    gap: 12px;
-  }
-
-  .detail-empty-icon {
-    font-size: 32px;
-    opacity: 0.3;
-  }
-
-  .detail-ticker {
-    padding: 20px 16px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .detail-ticker-name {
-    font-family: 'Outfit', sans-serif;
-    font-size: 24px;
-    font-weight: 800;
-    letter-spacing: 1px;
-  }
-
-  .detail-ticker-sub {
-    font-size: 10px;
-    color: var(--text-muted);
-    margin-top: 4px;
-    letter-spacing: 1px;
-  }
-
-  .detail-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1px;
-    background: var(--border);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .detail-cell {
-    padding: 12px 16px;
-    background: var(--bg-secondary);
-  }
-
-  .detail-cell-label {
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--text-muted);
-    margin-bottom: 4px;
-  }
-
-  .detail-cell-value {
-    font-size: 16px;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .detail-cell-value.green { color: var(--accent-green); }
-  .detail-cell-value.red { color: var(--accent-red); }
-  .detail-cell-value.amber { color: var(--accent-amber); }
-
-  /* RSI Gauge Visual */
-  .rsi-gauge {
-    padding: 16px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .rsi-gauge-bar {
-    height: 6px;
-    background: var(--bg-primary);
-    border-radius: 3px;
-    position: relative;
-    margin-top: 8px;
-    overflow: visible;
-  }
-
-  .rsi-gauge-fill {
-    height: 100%;
-    border-radius: 3px;
-    transition: width 0.5s;
-  }
-
-  .rsi-gauge-marker {
-    position: absolute;
-    top: -4px;
-    width: 2px;
-    height: 14px;
-    background: var(--text-primary);
-    transform: translateX(-50%);
-    box-shadow: 0 0 6px rgba(255,255,255,0.3);
-  }
-
-  .rsi-gauge-labels {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 6px;
-    font-size: 8px;
-    color: var(--text-muted);
-    letter-spacing: 1px;
-  }
-
-  .rsi-zone-30 {
-    position: absolute;
-    left: 30%;
-    top: -2px;
-    height: 10px;
-    width: 1px;
-    background: var(--accent-green);
-    opacity: 0.4;
-  }
-
-  .rsi-zone-50 {
-    position: absolute;
-    left: 50%;
-    top: -2px;
-    height: 10px;
-    width: 1px;
-    background: var(--accent-amber);
-    opacity: 0.4;
-  }
-
-  .rsi-zone-70 {
-    position: absolute;
-    left: 70%;
-    top: -2px;
-    height: 10px;
-    width: 1px;
-    background: var(--accent-red);
-    opacity: 0.4;
-  }
-
-  /* Timeline */
-  .detail-timeline {
-    padding: 16px;
-    flex: 1;
-    overflow-y: auto;
-  }
-
-  .timeline-item {
-    display: flex;
-    gap: 12px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 10px;
-  }
-
-  .timeline-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    margin-top: 3px;
-    flex-shrink: 0;
-  }
-
-  .timeline-dot.detected { background: var(--accent-amber); box-shadow: 0 0 8px var(--accent-amber-dim); }
-  .timeline-dot.confirmed { background: var(--accent-green); box-shadow: var(--glow-green); }
-  .timeline-dot.expired { background: var(--text-muted); }
-
-  .timeline-date {
-    color: var(--text-muted);
-    font-size: 9px;
-    margin-top: 2px;
-  }
-
-  /* Actions */
-  .detail-actions {
-    padding: 16px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    gap: 8px;
-  }
-
-  .action-btn {
-    flex: 1;
-    padding: 8px 12px;
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    background: transparent;
-    color: var(--text-secondary);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    text-align: center;
-  }
-
-  .action-btn:hover {
-    border-color: var(--accent-cyan);
-    color: var(--accent-cyan);
-  }
-
-  .action-btn.primary {
-    background: var(--accent-cyan);
-    border-color: var(--accent-cyan);
-    color: var(--bg-primary);
-    font-weight: 600;
-  }
-
-  .action-btn.primary:hover {
-    background: transparent;
-    color: var(--accent-cyan);
-  }
-
-  /* === ANIMATIONS === */
-  @keyframes fadeInRow {
-    from { opacity: 0; transform: translateY(4px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  tbody tr {
-    animation: fadeInRow 0.2s ease-out;
-  }
-
-  @keyframes glow-pulse {
-    0%, 100% { box-shadow: 0 0 4px var(--accent-green-dim); }
-    50% { box-shadow: var(--glow-green); }
-  }
-
-  .status-badge.confirmed {
-    animation: glow-pulse 3s ease-in-out infinite;
-  }
-
-  /* Responsive */
-  @media (max-width: 1200px) {
-    .main { grid-template-columns: 240px 1fr 280px; }
-  }
-
-  @media (max-width: 900px) {
-    .main { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; }
-    .panel-left, .panel-right { max-height: 300px; }
-  }
+:root{--bg-primary:#0a0a0f;--bg-secondary:#0f1018;--bg-tertiary:#151520;--bg-card:#12121c;--bg-hover:#1a1a2e;--border:#1e1e30;--border-active:#2a2a45;--text-primary:#e8e8f0;--text-secondary:#8888a0;--text-muted:#55556a;--accent-green:#00e676;--accent-green-dim:#00e67633;--accent-red:#ff3d5a;--accent-red-dim:#ff3d5a33;--accent-amber:#ffab00;--accent-amber-dim:#ffab0033;--accent-blue:#448aff;--accent-blue-dim:#448aff33;--accent-cyan:#18ffff;--accent-purple:#7c4dff;--glow-green:0 0 20px #00e67644;--glow-red:0 0 20px #ff3d5a44}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'JetBrains Mono',monospace;background:var(--bg-primary);color:var(--text-primary);overflow-x:hidden;min-height:100vh}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:9999}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:48px;background:var(--bg-secondary);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.topbar-left{display:flex;align-items:center;gap:16px}
+.logo-group{display:flex;flex-direction:column;line-height:1.1}
+.logo{font-family:'Outfit',sans-serif;font-weight:900;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--accent-cyan);text-shadow:0 0 10px rgba(24,255,255,0.3)}
+.logo-sub{font-family:'Outfit',sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);font-weight:400;margin-top:1px}
+.topbar-divider{width:1px;height:24px;background:var(--border)}
+.system-status{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--accent-green);box-shadow:var(--glow-green);animation:pulse-dot 2s ease-in-out infinite}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.4}}
+.topbar-right{display:flex;align-items:center;gap:16px;font-size:11px;color:var(--text-secondary)}
+.clock{font-variant-numeric:tabular-nums;color:var(--text-primary);font-weight:500}
+.refresh-btn{padding:4px 10px;border:1px solid var(--border);border-radius:3px;background:transparent;color:var(--text-secondary);font-family:'JetBrains Mono',monospace;font-size:10px;cursor:pointer;transition:all 0.15s;letter-spacing:0.5px;display:flex;align-items:center;gap:5px}
+.refresh-btn:hover{border-color:var(--accent-cyan);color:var(--accent-cyan)}
+.refresh-btn.loading{opacity:0.5;pointer-events:none}
+.refresh-icon{display:inline-block;transition:transform 0.3s}
+.refresh-btn.loading .refresh-icon{animation:spin 1s linear infinite}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.last-update{font-size:9px;color:var(--text-muted);letter-spacing:0.5px}
+.ticker-tape-wrap{height:46px;overflow:hidden;border-bottom:1px solid var(--border);background:var(--bg-secondary)}
+.ticker-tape-wrap .tradingview-widget-container{margin-top:-2px}
+.ribbon{display:flex;align-items:center;gap:0;padding:0;height:36px;background:var(--bg-tertiary);border-bottom:1px solid var(--border);overflow:hidden}
+.ribbon-item{display:flex;align-items:center;gap:8px;padding:0 20px;height:100%;border-right:1px solid var(--border);font-size:11px;white-space:nowrap}
+.ribbon-label{color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;font-size:9px}
+.ribbon-value{font-weight:600;font-variant-numeric:tabular-nums}
+.ribbon-value.green{color:var(--accent-green)}.ribbon-value.red{color:var(--accent-red)}.ribbon-value.amber{color:var(--accent-amber)}.ribbon-value.blue{color:var(--accent-blue)}
+.main{display:grid;grid-template-columns:280px 1fr 320px;grid-template-rows:1fr;height:calc(100vh - 130px);gap:1px;background:var(--border)}
+.panel-left{background:var(--bg-secondary);display:flex;flex-direction:column;overflow:hidden}
+.panel-header{padding:16px;border-bottom:1px solid var(--border);font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);display:flex;align-items:center;justify-content:space-between}
+.filter-section{padding:16px;border-bottom:1px solid var(--border)}
+.filter-label{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:10px}
+.filter-group{display:flex;flex-wrap:wrap;gap:6px}
+.filter-btn{padding:5px 10px;border:1px solid var(--border);border-radius:3px;background:transparent;color:var(--text-secondary);font-family:'JetBrains Mono',monospace;font-size:10px;cursor:pointer;transition:all 0.15s;letter-spacing:0.5px}
+.filter-btn:hover{border-color:var(--border-active);color:var(--text-primary);background:var(--bg-hover)}
+.filter-btn.active{border-color:var(--accent-cyan);color:var(--accent-cyan);background:rgba(24,255,255,0.05)}
+.filter-btn.green.active{border-color:var(--accent-green);color:var(--accent-green);background:var(--accent-green-dim)}
+.filter-btn.red.active{border-color:var(--accent-red);color:var(--accent-red);background:var(--accent-red-dim)}
+.filter-btn.amber.active{border-color:var(--accent-amber);color:var(--accent-amber);background:var(--accent-amber-dim)}
+.search-input{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:3px;background:var(--bg-primary);color:var(--text-primary);font-family:'JetBrains Mono',monospace;font-size:11px;outline:none;transition:border-color 0.15s}
+.search-input:focus{border-color:var(--accent-cyan)}
+.search-input::placeholder{color:var(--text-muted)}
+.rsi-range{display:flex;align-items:center;gap:8px;margin-top:8px}
+.rsi-range input[type="range"]{flex:1;-webkit-appearance:none;height:3px;background:var(--border);border-radius:2px;outline:none}
+.rsi-range input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--accent-cyan);cursor:pointer;box-shadow:0 0 6px rgba(24,255,255,0.4)}
+.rsi-val{font-size:11px;font-weight:600;color:var(--accent-cyan);min-width:28px;text-align:right;font-variant-numeric:tabular-nums}
+.panel-center{background:var(--bg-primary);display:flex;flex-direction:column;overflow:hidden}
+.table-container{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border-active) transparent}
+.table-container::-webkit-scrollbar{width:6px}
+.table-container::-webkit-scrollbar-track{background:transparent}
+.table-container::-webkit-scrollbar-thumb{background:var(--border-active);border-radius:3px}
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead{position:sticky;top:0;z-index:10}
+thead th{padding:10px 12px;text-align:left;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);background:var(--bg-tertiary);border-bottom:1px solid var(--border);cursor:pointer;white-space:nowrap;user-select:none;transition:color 0.15s}
+thead th:hover{color:var(--text-primary)}
+thead th.sorted{color:var(--accent-cyan)}
+tbody tr{border-bottom:1px solid var(--border);transition:background 0.1s;cursor:pointer}
+tbody tr:hover{background:var(--bg-hover)}
+tbody tr.selected{background:rgba(24,255,255,0.03);border-left:2px solid var(--accent-cyan)}
+tbody td{padding:10px 12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ticker-cell{font-weight:700;font-family:'Outfit',sans-serif;font-size:12px;letter-spacing:0.5px}
+.exchange-tag{font-size:8px;padding:2px 5px;border-radius:2px;margin-left:6px;font-weight:500;letter-spacing:1px;vertical-align:middle}
+.exchange-tag.us{background:var(--accent-blue-dim);color:var(--accent-blue)}
+.exchange-tag.pa{background:var(--accent-purple);color:white;opacity:0.7}
+.div-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:3px;font-size:10px;font-weight:600;letter-spacing:0.5px}
+.div-badge.bullish{background:var(--accent-green-dim);color:var(--accent-green)}
+.div-badge.bearish{background:var(--accent-red-dim);color:var(--accent-red)}
+.div-badge.flat{border:1px dashed;opacity:0.7}
+.status-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:3px;font-size:10px;font-weight:600;letter-spacing:0.5px}
+.status-badge.detected{background:var(--accent-amber-dim);color:var(--accent-amber)}
+.status-badge.confirmed{background:var(--accent-green-dim);color:var(--accent-green)}
+.status-badge.expired{background:rgba(85,85,106,0.2);color:var(--text-muted)}
+@keyframes fadeInRow{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+tbody tr{animation:fadeInRow 0.2s ease-out}
+@keyframes glow-pulse{0%,100%{box-shadow:0 0 4px var(--accent-green-dim)}50%{box-shadow:var(--glow-green)}}
+.status-badge.confirmed{animation:glow-pulse 3s ease-in-out infinite}
+.panel-right{background:var(--bg-secondary);display:flex;flex-direction:column;overflow:hidden}
+.detail-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:11px;gap:12px}
+.detail-empty-icon{font-size:32px;opacity:0.3}
+.detail-ticker{padding:20px 16px;border-bottom:1px solid var(--border)}
+.detail-ticker-name{font-family:'Outfit',sans-serif;font-size:24px;font-weight:800;letter-spacing:1px}
+.detail-ticker-sub{font-size:10px;color:var(--text-muted);margin-top:4px;letter-spacing:1px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-bottom:1px solid var(--border)}
+.detail-cell{padding:12px 16px;background:var(--bg-secondary)}
+.detail-cell-label{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:4px}
+.detail-cell-value{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
+.detail-cell-value.green{color:var(--accent-green)}
+.detail-cell-value.red{color:var(--accent-red)}
+.detail-cell-value.amber{color:var(--accent-amber)}
+.rsi-gauge{padding:16px;border-bottom:1px solid var(--border)}
+.rsi-gauge-bar{height:6px;background:var(--bg-primary);border-radius:3px;position:relative;margin-top:8px;overflow:visible}
+.rsi-gauge-fill{height:100%;border-radius:3px;transition:width 0.5s}
+.rsi-gauge-marker{position:absolute;top:-4px;width:2px;height:14px;background:var(--text-primary);transform:translateX(-50%);box-shadow:0 0 6px rgba(255,255,255,0.3)}
+.rsi-gauge-labels{display:flex;justify-content:space-between;margin-top:6px;font-size:8px;color:var(--text-muted);letter-spacing:1px}
+.rsi-zone-30{position:absolute;left:30%;top:-2px;height:10px;width:1px;background:var(--accent-green);opacity:0.4}
+.rsi-zone-50{position:absolute;left:50%;top:-2px;height:10px;width:1px;background:var(--accent-amber);opacity:0.4}
+.rsi-zone-70{position:absolute;left:70%;top:-2px;height:10px;width:1px;background:var(--accent-red);opacity:0.4}
+.detail-timeline{padding:16px;flex:1;overflow-y:auto}
+.timeline-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:10px}
+.timeline-dot{width:8px;height:8px;border-radius:50%;margin-top:3px;flex-shrink:0}
+.timeline-dot.detected{background:var(--accent-amber);box-shadow:0 0 8px var(--accent-amber-dim)}
+.timeline-dot.confirmed{background:var(--accent-green);box-shadow:var(--glow-green)}
+.timeline-dot.expired{background:var(--text-muted)}
+.timeline-date{color:var(--text-muted);font-size:9px;margin-top:2px}
+.detail-actions{padding:16px;border-top:1px solid var(--border);display:flex;gap:8px}
+.action-btn{flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:3px;background:transparent;color:var(--text-secondary);font-family:'JetBrains Mono',monospace;font-size:10px;cursor:pointer;transition:all 0.15s;text-transform:uppercase;letter-spacing:1px;text-align:center}
+.action-btn:hover{border-color:var(--accent-cyan);color:var(--accent-cyan)}
+.action-btn.primary{background:var(--accent-cyan);border-color:var(--accent-cyan);color:var(--bg-primary);font-weight:600}
+.action-btn.primary:hover{background:transparent;color:var(--accent-cyan)}
+.no-data{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:12px;gap:16px}
+.no-data-icon{font-size:48px;opacity:0.2}
+@media(max-width:1200px){.main{grid-template-columns:240px 1fr 280px}}
+@media(max-width:900px){.main{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}.panel-left,.panel-right{max-height:300px}}
 </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
 <div class="topbar">
   <div class="topbar-left">
-    <div class="logo">RSI PREDATOR <span>GM CAPITAL</span></div>
+    <div class="logo-group">
+      <div class="logo">RSI DIVERGENCE PREDATOR</div>
+      <div class="logo-sub">powered by GM Capital</div>
+    </div>
     <div class="topbar-divider"></div>
     <div class="system-status">
-      <div class="status-dot"></div>
-      <span>SYSTEM ONLINE</span>
+      <div class="status-dot" id="status-dot"></div>
+      <span id="system-status-text">LOADING...</span>
     </div>
   </div>
   <div class="topbar-right">
-    <span>SCAN <span style="color:var(--accent-green)">19,284</span> TICKERS</span>
-    <span>LAST SCAN <span style="color:var(--text-primary)">22:00 UTC</span></span>
+    <span id="scan-info">—</span>
+    <span class="last-update" id="last-update">—</span>
+    <button class="refresh-btn" id="refresh-btn" onclick="loadData()">
+      <span class="refresh-icon">↻</span> REFRESH
+    </button>
     <span class="clock" id="clock">--:--:--</span>
   </div>
 </div>
 
-<!-- STATS RIBBON -->
+<!-- TradingView Ticker Tape -->
+<div class="ticker-tape-wrap">
+<div class="tradingview-widget-container">
+  <div class="tradingview-widget-container__widget"></div>
+  <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+  {
+    "symbols": [
+      {"proName":"FOREXCOM:SPXUSD","title":"S&P 500"},
+      {"proName":"FOREXCOM:NSXUSD","title":"NASDAQ"},
+      {"proName":"INDEX:DJI","title":"DOW 30"},
+      {"proName":"BITSTAMP:BTCUSD","title":"Bitcoin"},
+      {"proName":"BITSTAMP:ETHUSD","title":"Ethereum"},
+      {"proName":"COMEX:GC1!","title":"Gold"},
+      {"proName":"NYMEX:CL1!","title":"Crude Oil"},
+      {"proName":"COMEX:SI1!","title":"Silver"},
+      {"proName":"COMEX:HG1!","title":"Copper"},
+      {"proName":"FX:EURUSD","title":"EUR/USD"},
+      {"proName":"FX:GBPUSD","title":"GBP/USD"},
+      {"proName":"FX:USDJPY","title":"USD/JPY"},
+      {"proName":"TVC:VIX","title":"VIX"},
+      {"proName":"TVC:US10Y","title":"US 10Y"}
+    ],
+    "showSymbolLogo": false,
+    "isTransparent": true,
+    "displayMode": "adaptive",
+    "colorTheme": "dark",
+    "locale": "en"
+  }
+  </script>
+</div>
+</div>
+
 <div class="ribbon">
   <div class="ribbon-item">
     <span class="ribbon-label">Active Drops</span>
-    <span class="ribbon-value amber" id="stat-active">47</span>
+    <span class="ribbon-value amber" id="stat-active">—</span>
   </div>
   <div class="ribbon-item">
     <span class="ribbon-label">Confirmed</span>
-    <span class="ribbon-value green" id="stat-confirmed">12</span>
+    <span class="ribbon-value green" id="stat-confirmed">—</span>
   </div>
   <div class="ribbon-item">
     <span class="ribbon-label">Expired</span>
-    <span class="ribbon-value" style="color:var(--text-muted)" id="stat-expired">8</span>
+    <span class="ribbon-value" style="color:var(--text-muted)" id="stat-expired">—</span>
   </div>
   <div class="ribbon-item">
     <span class="ribbon-label">Bull / Bear</span>
-    <span class="ribbon-value green">34</span>
+    <span class="ribbon-value green" id="stat-bull">—</span>
     <span style="color:var(--text-muted)">/</span>
-    <span class="ribbon-value red">13</span>
+    <span class="ribbon-value red" id="stat-bear">—</span>
   </div>
   <div class="ribbon-item">
-    <span class="ribbon-label">New Today</span>
-    <span class="ribbon-value blue" id="stat-new">5</span>
-  </div>
-  <div class="ribbon-item">
-    <span class="ribbon-label">Avg RSI</span>
-    <span class="ribbon-value" id="stat-rsi">32.4</span>
+    <span class="ribbon-label">Total Drops</span>
+    <span class="ribbon-value blue" id="stat-total">—</span>
   </div>
 </div>
 
-<!-- MAIN GRID -->
 <div class="main">
-
-  <!-- LEFT PANEL -->
   <div class="panel-left">
     <div class="panel-header">FILTERS</div>
-
     <div class="filter-section">
       <div class="filter-label">Search</div>
       <input type="text" class="search-input" placeholder="TICKER..." id="search-input">
     </div>
-
     <div class="filter-section">
       <div class="filter-label">Status</div>
       <div class="filter-group">
@@ -774,7 +219,6 @@
         <button class="filter-btn" data-filter="status" data-value="expired">⚪ EXPIRED</button>
       </div>
     </div>
-
     <div class="filter-section">
       <div class="filter-label">Type</div>
       <div class="filter-group">
@@ -783,7 +227,6 @@
         <button class="filter-btn active" data-filter="type" data-value="flat">≈ FLAT</button>
       </div>
     </div>
-
     <div class="filter-section">
       <div class="filter-label">Exchange</div>
       <div class="filter-group">
@@ -791,7 +234,6 @@
         <button class="filter-btn active" data-filter="exchange" data-value="PA">PA</button>
       </div>
     </div>
-
     <div class="filter-section">
       <div class="filter-label">RSI Current Max</div>
       <div class="rsi-range">
@@ -799,45 +241,33 @@
         <span class="rsi-val" id="rsi-filter-val">100</span>
       </div>
     </div>
-
-    <div class="filter-section">
-      <div class="filter-label">Mode</div>
-      <div class="filter-group">
-        <button class="filter-btn active" data-mode="tight">TIGHT</button>
-        <button class="filter-btn active" data-mode="balanced">BALANCED</button>
-        <button class="filter-btn active" data-mode="full_gm">FULL GM</button>
-      </div>
-    </div>
   </div>
 
-  <!-- CENTER PANEL - TABLE -->
   <div class="panel-center">
     <div class="panel-header">
       <span>DROPS LIBRARY</span>
-      <span style="color:var(--text-muted);font-weight:400" id="result-count">47 results</span>
+      <span style="color:var(--text-muted);font-weight:400" id="result-count">— results</span>
     </div>
-    <div class="table-container">
+    <div class="table-container" id="table-container">
       <table>
         <thead>
           <tr>
-            <th class="sorted">TICKER ↓</th>
+            <th>TICKER</th>
             <th>TYPE</th>
             <th>STATUS</th>
             <th>RSI PREV</th>
-            <th>RSI CURR</th>
+            <th>RSI DIV</th>
             <th>RSI NOW</th>
             <th>PRICE</th>
             <th>DETECTED</th>
             <th>BARS</th>
           </tr>
         </thead>
-        <tbody id="drops-table">
-        </tbody>
+        <tbody id="drops-table"></tbody>
       </table>
     </div>
   </div>
 
-  <!-- RIGHT PANEL - DETAIL -->
   <div class="panel-right">
     <div class="panel-header">DETAIL</div>
     <div id="detail-panel">
@@ -851,226 +281,232 @@
 </div>
 
 <script>
-// === MOCK DATA (will be replaced by SQLite data) ===
-const mockDrops = [
-  { ticker: "ADOCIA", exchange: "PA", div_type: "bullish", status: "confirmed", prev_rsi: 22.5, curr_rsi: 28.1, rsi_current: 52.3, curr_price: 4.85, prev_price: 5.40, date_detected: "2025-11-30", break_date: "2026-01-31", bars_elapsed: 2 },
-  { ticker: "DBV", exchange: "PA", div_type: "flat_bullish", status: "detected", prev_rsi: 18.7, curr_rsi: 19.2, rsi_current: 31.4, curr_price: 1.12, prev_price: 1.45, date_detected: "2025-12-31", break_date: null, bars_elapsed: 1 },
-  { ticker: "PLTR", exchange: "US", div_type: "bearish", status: "detected", prev_rsi: 71.2, curr_rsi: 68.3, rsi_current: 64.5, curr_price: 89.20, prev_price: 72.30, date_detected: "2026-01-31", break_date: null, bars_elapsed: 0 },
-  { ticker: "SMCI", exchange: "US", div_type: "bullish", status: "confirmed", prev_rsi: 24.1, curr_rsi: 29.8, rsi_current: 55.2, curr_price: 28.50, prev_price: 35.20, date_detected: "2025-10-31", break_date: "2026-01-31", bars_elapsed: 3 },
-  { ticker: "VALA", exchange: "PA", div_type: "bullish", status: "detected", prev_rsi: 28.3, curr_rsi: 32.1, rsi_current: 38.7, curr_price: 3.20, prev_price: 4.10, date_detected: "2025-12-31", break_date: null, bars_elapsed: 1 },
-  { ticker: "NVDA", exchange: "US", div_type: "bearish", status: "expired", prev_rsi: 74.5, curr_rsi: 69.2, rsi_current: 58.1, curr_price: 142.00, prev_price: 118.50, date_detected: "2025-08-31", break_date: null, bars_elapsed: 12 },
-  { ticker: "AELIS", exchange: "PA", div_type: "flat_bullish", status: "detected", prev_rsi: 15.3, curr_rsi: 16.1, rsi_current: 22.8, curr_price: 7.80, prev_price: 8.90, date_detected: "2026-01-31", break_date: null, bars_elapsed: 0 },
-  { ticker: "SOFI", exchange: "US", div_type: "bullish", status: "confirmed", prev_rsi: 26.7, curr_rsi: 33.4, rsi_current: 56.8, curr_price: 12.40, prev_price: 14.80, date_detected: "2025-09-30", break_date: "2025-12-31", bars_elapsed: 3 },
-  { ticker: "MDCL", exchange: "PA", div_type: "bullish", status: "detected", prev_rsi: 19.8, curr_rsi: 25.3, rsi_current: 34.2, curr_price: 6.50, prev_price: 8.20, date_detected: "2025-12-31", break_date: null, bars_elapsed: 1 },
-  { ticker: "RIVN", exchange: "US", div_type: "flat_bearish", status: "detected", prev_rsi: 67.3, curr_rsi: 66.8, rsi_current: 61.2, curr_price: 18.90, prev_price: 15.20, date_detected: "2026-01-31", break_date: null, bars_elapsed: 0 },
-  { ticker: "MARA", exchange: "US", div_type: "bullish", status: "detected", prev_rsi: 21.4, curr_rsi: 27.9, rsi_current: 41.3, curr_price: 15.60, prev_price: 19.80, date_detected: "2025-11-30", break_date: null, bars_elapsed: 2 },
-  { ticker: "COIN", exchange: "US", div_type: "bearish", status: "confirmed", prev_rsi: 72.8, curr_rsi: 65.1, rsi_current: 44.2, curr_price: 285.00, prev_price: 245.00, date_detected: "2025-10-31", break_date: "2026-01-31", bars_elapsed: 3 },
-];
+const DATA_URL = 'drops.json';
+let allDrops = [];
 
-// === CLOCK ===
-function updateClock() {
-  const now = new Date();
-  document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', { hour12: false });
+// Clock
+function updateClock(){
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US',{hour12:false});
 }
-setInterval(updateClock, 1000);
+setInterval(updateClock,1000);
 updateClock();
 
-// === RENDER TABLE ===
-function renderTable(data) {
+// Load data from drops.json
+async function loadData(){
+  const btn = document.getElementById('refresh-btn');
+  btn.classList.add('loading');
+  try {
+    const r = await fetch(DATA_URL + '?t=' + Date.now());
+    if(!r.ok) throw new Error('No data');
+    const data = await r.json();
+    allDrops = data.drops || [];
+    
+    // Update stats
+    const detected = allDrops.filter(d=>d.status==='detected').length;
+    const confirmed = allDrops.filter(d=>d.status==='confirmed').length;
+    const expired = allDrops.filter(d=>d.status==='expired').length;
+    const bulls = allDrops.filter(d=>d.div_type.includes('bull')).length;
+    const bears = allDrops.filter(d=>d.div_type.includes('bear')).length;
+    
+    document.getElementById('stat-active').textContent = detected;
+    document.getElementById('stat-confirmed').textContent = confirmed;
+    document.getElementById('stat-expired').textContent = expired;
+    document.getElementById('stat-bull').textContent = bulls;
+    document.getElementById('stat-bear').textContent = bears;
+    document.getElementById('stat-total').textContent = allDrops.length;
+    
+    // Update status
+    document.getElementById('status-dot').style.background = 'var(--accent-green)';
+    document.getElementById('system-status-text').textContent = 'DATA LOADED';
+    document.getElementById('scan-info').innerHTML = 'DROPS <span style="color:var(--accent-green)">' + allDrops.length + '</span>';
+    
+    // Update timestamp
+    if(data.generated_at){
+      const d = new Date(data.generated_at + 'Z');
+      document.getElementById('last-update').textContent = 'UPDATED ' + d.toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}).toUpperCase();
+    }
+    
+    applyFilters();
+  } catch(e){
+    document.getElementById('status-dot').style.background = 'var(--accent-amber)';
+    document.getElementById('system-status-text').textContent = 'NO DATA — RUN SCAN FIRST';
+    document.getElementById('drops-table').innerHTML = '';
+    document.getElementById('table-container').innerHTML = '<div class="no-data"><div class="no-data-icon">⚡</div><span>No drops.json found</span><span style="font-size:10px;color:var(--text-muted)">Run python3 scan.py to generate data</span></div>';
+  }
+  btn.classList.remove('loading');
+}
+
+// Render table
+function renderTable(data){
   const tbody = document.getElementById('drops-table');
   tbody.innerHTML = '';
   document.getElementById('result-count').textContent = data.length + ' results';
-
-  data.forEach((drop, idx) => {
+  data.forEach((drop,idx)=>{
     const tr = document.createElement('tr');
-    tr.style.animationDelay = (idx * 0.03) + 's';
-    tr.onclick = () => selectDrop(drop, tr);
-
+    tr.style.animationDelay = (idx*0.02)+'s';
+    tr.onclick = ()=>selectDrop(drop,tr);
     const isBull = drop.div_type.includes('bull');
     const isFlat = drop.div_type.includes('flat');
-    const divClass = isBull ? 'bullish' : 'bearish';
-    const divLabel = (isFlat ? '≈ ' : '') + (isBull ? 'BULL' : 'BEAR');
-    const exClass = drop.exchange.toLowerCase();
-
+    const divClass = isBull?'bullish':'bearish';
+    const divLabel = (isFlat?'≈ ':'')+(isBull?'BULL':'BEAR');
+    const exClass = (drop.exchange||'').toLowerCase();
+    const rsiNow = drop.rsi_current||0;
     let rsiColor = '';
-    if (drop.rsi_current < 30) rsiColor = 'color:var(--accent-green)';
-    else if (drop.rsi_current < 50) rsiColor = 'color:var(--accent-amber)';
-    else if (drop.rsi_current > 70) rsiColor = 'color:var(--accent-red)';
-
+    if(rsiNow<30)rsiColor='color:var(--accent-green)';
+    else if(rsiNow<50)rsiColor='color:var(--accent-amber)';
+    else if(rsiNow>70)rsiColor='color:var(--accent-red)';
+    const price = drop.curr_price||0;
     tr.innerHTML = `
-      <td><span class="ticker-cell">${drop.ticker}</span><span class="exchange-tag ${exClass}">${drop.exchange}</span></td>
-      <td><span class="div-badge ${divClass} ${isFlat ? 'flat' : ''}">${divLabel}</span></td>
-      <td><span class="status-badge ${drop.status}">${drop.status.toUpperCase()}</span></td>
-      <td style="color:var(--text-secondary)">${drop.prev_rsi.toFixed(1)}</td>
-      <td style="color:var(--text-secondary)">${drop.curr_rsi.toFixed(1)}</td>
-      <td style="${rsiColor};font-weight:600">${drop.rsi_current.toFixed(1)}</td>
-      <td>$${drop.curr_price.toFixed(2)}</td>
-      <td style="color:var(--text-muted)">${drop.date_detected}</td>
-      <td style="color:var(--text-muted)">${drop.bars_elapsed}</td>
+      <td><span class="ticker-cell">${drop.ticker}</span><span class="exchange-tag ${exClass}">${drop.exchange||''}</span></td>
+      <td><span class="div-badge ${divClass} ${isFlat?'flat':''}">${divLabel}</span></td>
+      <td><span class="status-badge ${drop.status}">${(drop.status||'').toUpperCase()}</span></td>
+      <td style="color:var(--text-secondary)">${(drop.prev_rsi||0).toFixed?drop.prev_rsi.toFixed(1):drop.prev_rsi}</td>
+      <td style="color:var(--text-secondary)">${(drop.curr_rsi||0).toFixed?drop.curr_rsi.toFixed(1):drop.curr_rsi}</td>
+      <td style="${rsiColor};font-weight:600">${rsiNow.toFixed?rsiNow.toFixed(1):rsiNow}</td>
+      <td>${price.toFixed?'$'+price.toFixed(2):price}</td>
+      <td style="color:var(--text-muted)">${drop.date_detected||''}</td>
+      <td style="color:var(--text-muted)">${drop.bars_elapsed||0}</td>
     `;
     tbody.appendChild(tr);
   });
 }
 
-// === SELECT DROP → DETAIL PANEL ===
-function selectDrop(drop, tr) {
-  document.querySelectorAll('tbody tr').forEach(r => r.classList.remove('selected'));
+// Select drop
+function selectDrop(drop,tr){
+  document.querySelectorAll('tbody tr').forEach(r=>r.classList.remove('selected'));
   tr.classList.add('selected');
-
   const isBull = drop.div_type.includes('bull');
-  const panel = document.getElementById('detail-panel');
-
+  const rsiNow = drop.rsi_current||0;
   let rsiGaugeColor = 'var(--accent-green)';
-  if (drop.rsi_current > 50) rsiGaugeColor = 'var(--accent-amber)';
-  if (drop.rsi_current > 70) rsiGaugeColor = 'var(--accent-red)';
-
+  if(rsiNow>50)rsiGaugeColor='var(--accent-amber)';
+  if(rsiNow>70)rsiGaugeColor='var(--accent-red)';
+  const price = drop.curr_price||0;
+  const prevPrice = drop.prev_price||0;
+  const panel = document.getElementById('detail-panel');
   panel.innerHTML = `
     <div class="detail-ticker">
-      <div class="detail-ticker-name">${drop.ticker}<span class="exchange-tag ${drop.exchange.toLowerCase()}" style="font-size:10px;margin-left:10px">${drop.exchange}</span></div>
-      <div class="detail-ticker-sub">${drop.div_type.toUpperCase().replace('_', ' ')} DIVERGENCE · MONTHLY</div>
+      <div class="detail-ticker-name">${drop.ticker}<span class="exchange-tag ${(drop.exchange||'').toLowerCase()}" style="font-size:10px;margin-left:10px">${drop.exchange||''}</span></div>
+      <div class="detail-ticker-sub">${(drop.div_type||'').toUpperCase().replace('_',' ')} DIVERGENCE · MONTHLY</div>
     </div>
-
     <div class="detail-grid">
       <div class="detail-cell">
         <div class="detail-cell-label">Status</div>
-        <div class="detail-cell-value ${drop.status === 'confirmed' ? 'green' : drop.status === 'detected' ? 'amber' : ''}">${drop.status.toUpperCase()}</div>
+        <div class="detail-cell-value ${drop.status==='confirmed'?'green':drop.status==='detected'?'amber':''}">${(drop.status||'').toUpperCase()}</div>
       </div>
       <div class="detail-cell">
         <div class="detail-cell-label">Bars Elapsed</div>
-        <div class="detail-cell-value">${drop.bars_elapsed} / 12</div>
+        <div class="detail-cell-value">${drop.bars_elapsed||0} / 12</div>
       </div>
       <div class="detail-cell">
         <div class="detail-cell-label">Price at Div</div>
-        <div class="detail-cell-value">$${drop.curr_price.toFixed(2)}</div>
+        <div class="detail-cell-value">${price.toFixed?'$'+price.toFixed(2):price}</div>
       </div>
       <div class="detail-cell">
         <div class="detail-cell-label">Prev Price</div>
-        <div class="detail-cell-value" style="color:var(--text-secondary)">$${drop.prev_price.toFixed(2)}</div>
+        <div class="detail-cell-value" style="color:var(--text-secondary)">${prevPrice.toFixed?'$'+prevPrice.toFixed(2):prevPrice}</div>
       </div>
       <div class="detail-cell">
         <div class="detail-cell-label">RSI at Div</div>
-        <div class="detail-cell-value">${drop.curr_rsi.toFixed(1)}</div>
+        <div class="detail-cell-value">${(drop.curr_rsi||0).toFixed?(drop.curr_rsi).toFixed(1):drop.curr_rsi}</div>
       </div>
       <div class="detail-cell">
         <div class="detail-cell-label">RSI Prev Pivot</div>
-        <div class="detail-cell-value" style="color:var(--text-secondary)">${drop.prev_rsi.toFixed(1)}</div>
+        <div class="detail-cell-value" style="color:var(--text-secondary)">${(drop.prev_rsi||0).toFixed?(drop.prev_rsi).toFixed(1):drop.prev_rsi}</div>
       </div>
     </div>
-
     <div class="rsi-gauge">
-      <div class="filter-label">RSI CURRENT: <span style="color:${rsiGaugeColor};font-size:13px;font-weight:700">${drop.rsi_current.toFixed(1)}</span></div>
+      <div class="filter-label">RSI CURRENT: <span style="color:${rsiGaugeColor};font-size:13px;font-weight:700">${rsiNow.toFixed?rsiNow.toFixed(1):rsiNow}</span></div>
       <div class="rsi-gauge-bar">
         <div class="rsi-zone-30"></div>
         <div class="rsi-zone-50"></div>
         <div class="rsi-zone-70"></div>
-        <div class="rsi-gauge-fill" style="width:${drop.rsi_current}%;background:${rsiGaugeColor}"></div>
-        <div class="rsi-gauge-marker" style="left:${drop.rsi_current}%"></div>
+        <div class="rsi-gauge-fill" style="width:${rsiNow}%;background:${rsiGaugeColor}"></div>
+        <div class="rsi-gauge-marker" style="left:${rsiNow}%"></div>
       </div>
-      <div class="rsi-gauge-labels">
-        <span>0</span><span>30</span><span>50</span><span>70</span><span>100</span>
-      </div>
+      <div class="rsi-gauge-labels"><span>0</span><span>30</span><span>50</span><span>70</span><span>100</span></div>
     </div>
-
     <div class="detail-timeline">
       <div class="filter-label" style="margin-bottom:12px">TIMELINE</div>
       <div class="timeline-item">
         <div class="timeline-dot detected"></div>
         <div>
           <div style="color:var(--text-primary)">Divergence detected</div>
-          <div class="timeline-date">${drop.date_detected}</div>
+          <div class="timeline-date">${drop.date_detected||''}</div>
         </div>
       </div>
-      ${drop.status === 'confirmed' ? `
+      ${drop.status==='confirmed'?`
       <div class="timeline-item">
         <div class="timeline-dot confirmed"></div>
         <div>
           <div style="color:var(--accent-green)">RSI broke above 50 ✓</div>
-          <div class="timeline-date">${drop.break_date}</div>
+          <div class="timeline-date">${drop.break_date||''}</div>
         </div>
-      </div>` : drop.status === 'expired' ? `
+      </div>`:drop.status==='expired'?`
       <div class="timeline-item">
         <div class="timeline-dot expired"></div>
         <div>
           <div style="color:var(--text-muted)">Window expired — no break</div>
-          <div class="timeline-date">${drop.bars_elapsed} bars elapsed</div>
+          <div class="timeline-date">${drop.bars_elapsed||0} bars elapsed</div>
         </div>
-      </div>` : `
+      </div>`:`
       <div class="timeline-item">
         <div class="timeline-dot" style="background:var(--border-active)"></div>
         <div>
           <div style="color:var(--text-muted)">Waiting for RSI break 50...</div>
-          <div class="timeline-date">${12 - drop.bars_elapsed} bars remaining</div>
+          <div class="timeline-date">${12-(drop.bars_elapsed||0)} bars remaining</div>
         </div>
       </div>`}
     </div>
-
     <div class="detail-actions">
-      <button class="action-btn primary" onclick="window.open('https://www.tradingview.com/chart/?symbol=${drop.exchange === 'PA' ? 'EURONEXT:' : ''}${drop.ticker}', '_blank')">TRADINGVIEW</button>
+      <button class="action-btn primary" onclick="window.open('https://www.tradingview.com/chart/?symbol=${drop.exchange==='PA'?'EURONEXT:':''}${drop.ticker}','_blank')">TRADINGVIEW</button>
       <button class="action-btn">INVALIDATE</button>
     </div>
   `;
 }
 
-// === FILTER LOGIC ===
-const activeFilters = {
-  status: ['detected', 'confirmed'],
-  type: ['bullish', 'bearish', 'flat'],
-  exchange: ['US', 'PA'],
-  rsiMax: 100,
-  search: '',
-};
+// Filters
+const activeFilters = {status:['detected','confirmed'],type:['bullish','bearish','flat'],exchange:['US','PA'],rsiMax:100,search:''};
 
-document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
-  btn.addEventListener('click', () => {
+document.querySelectorAll('.filter-btn[data-filter]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
     btn.classList.toggle('active');
-    const filter = btn.dataset.filter;
-    const value = btn.dataset.value;
-
-    if (btn.classList.contains('active')) {
-      if (!activeFilters[filter].includes(value)) activeFilters[filter].push(value);
-    } else {
-      activeFilters[filter] = activeFilters[filter].filter(v => v !== value);
-    }
+    const f=btn.dataset.filter, v=btn.dataset.value;
+    if(btn.classList.contains('active')){if(!activeFilters[f].includes(v))activeFilters[f].push(v)}
+    else{activeFilters[f]=activeFilters[f].filter(x=>x!==v)}
     applyFilters();
   });
 });
 
-document.getElementById('search-input').addEventListener('input', (e) => {
-  activeFilters.search = e.target.value.toUpperCase();
+document.getElementById('search-input').addEventListener('input',e=>{
+  activeFilters.search=e.target.value.toUpperCase();
   applyFilters();
 });
 
-document.getElementById('rsi-filter').addEventListener('input', (e) => {
-  activeFilters.rsiMax = parseInt(e.target.value);
-  document.getElementById('rsi-filter-val').textContent = e.target.value;
+document.getElementById('rsi-filter').addEventListener('input',e=>{
+  activeFilters.rsiMax=parseInt(e.target.value);
+  document.getElementById('rsi-filter-val').textContent=e.target.value;
   applyFilters();
 });
 
-function applyFilters() {
-  const filtered = mockDrops.filter(d => {
-    if (activeFilters.search && !d.ticker.includes(activeFilters.search)) return false;
-    if (!activeFilters.status.includes(d.status)) return false;
-    if (d.rsi_current > activeFilters.rsiMax) return false;
-
-    const isBull = d.div_type.includes('bull');
-    const isBear = d.div_type.includes('bear');
-    const isFlat = d.div_type.includes('flat');
-
-    let typeMatch = false;
-    if (isBull && activeFilters.type.includes('bullish')) typeMatch = true;
-    if (isBear && activeFilters.type.includes('bearish')) typeMatch = true;
-    if (isFlat && activeFilters.type.includes('flat')) typeMatch = true;
-    if (!typeMatch) return false;
-
-    if (!activeFilters.exchange.includes(d.exchange)) return false;
+function applyFilters(){
+  const filtered = allDrops.filter(d=>{
+    if(activeFilters.search && !(d.ticker||'').includes(activeFilters.search)) return false;
+    if(!activeFilters.status.includes(d.status)) return false;
+    if((d.rsi_current||0) > activeFilters.rsiMax) return false;
+    const isBull=d.div_type.includes('bull'), isBear=d.div_type.includes('bear'), isFlat=d.div_type.includes('flat');
+    let typeMatch=false;
+    if(isBull&&activeFilters.type.includes('bullish'))typeMatch=true;
+    if(isBear&&activeFilters.type.includes('bearish'))typeMatch=true;
+    if(isFlat&&activeFilters.type.includes('flat'))typeMatch=true;
+    if(!typeMatch)return false;
+    if(!activeFilters.exchange.includes(d.exchange))return false;
     return true;
   });
-
   renderTable(filtered);
 }
 
-// === INIT ===
-renderTable(mockDrops);
+// Init
+loadData();
 </script>
 </body>
 </html>
