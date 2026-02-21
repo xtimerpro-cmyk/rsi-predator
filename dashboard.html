@@ -120,72 +120,7 @@ tbody tr{animation:fadeInRow 0.2s ease-out}
 .no-data{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:12px;gap:16px}
 .no-data-icon{font-size:48px;opacity:0.2}
 @media(max-width:1200px){.main{grid-template-columns:240px 1fr 280px}}
-
-/* === MOBILE === */
-@media(max-width:900px){
-  .topbar{padding:0 12px;height:44px}
-  .topbar-left{gap:8px}
-  .logo{font-size:10px;letter-spacing:2px}
-  .logo-sub{font-size:7px}
-  .topbar-divider,.system-status{display:none}
-  .topbar-right{gap:8px}
-  .topbar-right #scan-info,.topbar-right .last-update{display:none}
-  .clock{font-size:10px}
-  .refresh-btn{padding:3px 8px;font-size:9px}
-  .ticker-tape-wrap{height:40px}
-  .ribbon{height:auto;flex-wrap:wrap;padding:6px 8px;gap:4px}
-  .ribbon-item{padding:4px 10px;border-right:none;font-size:10px;background:var(--bg-card);border-radius:4px;border:1px solid var(--border)}
-  .ribbon-label{font-size:8px}
-  
-  /* Mobile layout: vertical scroll, no grid */
-  .main{display:flex;flex-direction:column;height:auto;min-height:calc(100vh - 160px);gap:0;background:var(--bg-primary)}
-  
-  /* Filters: collapsible */
-  .panel-left{display:none;background:var(--bg-secondary);border-bottom:1px solid var(--border)}
-  .panel-left.open{display:flex}
-  .filter-section{padding:12px}
-  
-  /* Table: cards on mobile */
-  .panel-center{background:var(--bg-primary);flex:1;overflow:visible}
-  .panel-center .panel-header{position:sticky;top:44px;z-index:50;background:var(--bg-tertiary)}
-  .table-container{overflow:visible}
-  table{display:none}
-  
-  /* Mobile card list */
-  .mobile-cards{display:flex;flex-direction:column;gap:1px;padding:0}
-  .mobile-card{background:var(--bg-secondary);padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s}
-  .mobile-card:active{background:var(--bg-hover)}
-  .mobile-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-  .mobile-card-ticker{font-family:'Outfit',sans-serif;font-weight:800;font-size:16px;letter-spacing:0.5px;display:flex;align-items:center;gap:6px}
-  .mobile-card-badges{display:flex;gap:6px}
-  .mobile-card-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:3px 0}
-  .mobile-card-label{color:var(--text-muted);font-size:9px;text-transform:uppercase;letter-spacing:1px}
-  .mobile-card-value{font-weight:600;font-variant-numeric:tabular-nums}
-  .mobile-card-rsi-bar{height:3px;background:var(--bg-primary);border-radius:2px;margin-top:8px;position:relative;overflow:visible}
-  .mobile-card-rsi-fill{height:100%;border-radius:2px}
-  .mobile-card-rsi-marker{position:absolute;top:-3px;width:2px;height:9px;background:white;transform:translateX(-50%);border-radius:1px}
-  
-  /* Detail panel: full screen overlay on mobile */
-  .panel-right{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:var(--bg-primary);overflow-y:auto}
-  .panel-right.open{display:flex;flex-direction:column}
-  .detail-ticker-name{font-size:20px}
-  .detail-cell{padding:10px 14px}
-  .detail-cell-value{font-size:14px}
-  .detail-actions{position:sticky;bottom:0;background:var(--bg-secondary);padding:12px 16px}
-  
-  /* Mobile filter toggle + back button */
-  .mobile-filter-toggle{display:flex;padding:4px 10px;border:1px solid var(--border);border-radius:3px;background:transparent;color:var(--text-secondary);font-family:'JetBrains Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:0.5px;align-items:center;gap:4px}
-  .mobile-filter-toggle:active{border-color:var(--accent-cyan);color:var(--accent-cyan)}
-  .mobile-back-btn{display:none;padding:10px 16px;background:var(--bg-tertiary);border:none;border-bottom:1px solid var(--border);color:var(--accent-cyan);font-family:'JetBrains Mono',monospace;font-size:11px;cursor:pointer;text-align:left;letter-spacing:1px;text-transform:uppercase}
-  .panel-right.open .mobile-back-btn{display:block}
-}
-
-/* Desktop: hide mobile elements */
-@media(min-width:901px){
-  .mobile-cards{display:none!important}
-  .mobile-filter-toggle{display:none!important}
-  .mobile-back-btn{display:none!important}
-}
+@media(max-width:900px){.main{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}.panel-left,.panel-right{max-height:300px}}
 </style>
 </head>
 <body>
@@ -311,14 +246,10 @@ tbody tr{animation:fadeInRow 0.2s ease-out}
   <div class="panel-center">
     <div class="panel-header">
       <span>DROPS LIBRARY</span>
-      <div style="display:flex;gap:8px;align-items:center">
-        <button class="mobile-filter-toggle" id="filter-toggle" onclick="toggleFilters()">☰ FILTERS</button>
-        <span style="color:var(--text-muted);font-weight:400" id="result-count">— results</span>
-      </div>
+      <span style="color:var(--text-muted);font-weight:400" id="result-count">— results</span>
     </div>
     <div class="table-container" id="table-container">
-      <table id="desktop-table">
-        <thead>
+      <table>
         <thead>
           <tr>
             <th>TICKER</th>
@@ -334,12 +265,10 @@ tbody tr{animation:fadeInRow 0.2s ease-out}
         </thead>
         <tbody id="drops-table"></tbody>
       </table>
-      <div class="mobile-cards" id="mobile-cards"></div>
     </div>
   </div>
 
-  <div class="panel-right" id="panel-right">
-    <button class="mobile-back-btn" onclick="closeDetail()">← BACK TO LIST</button>
+  <div class="panel-right">
     <div class="panel-header">DETAIL</div>
     <div id="detail-panel">
       <div class="detail-empty">
@@ -410,12 +339,9 @@ async function loadData(){
 // Render table
 function renderTable(data){
   const tbody = document.getElementById('drops-table');
-  const mobileCards = document.getElementById('mobile-cards');
   tbody.innerHTML = '';
-  mobileCards.innerHTML = '';
   document.getElementById('result-count').textContent = data.length + ' results';
   data.forEach((drop,idx)=>{
-    // Desktop row
     const tr = document.createElement('tr');
     tr.style.animationDelay = (idx*0.02)+'s';
     tr.onclick = ()=>selectDrop(drop,tr);
@@ -442,54 +368,13 @@ function renderTable(data){
       <td style="color:var(--text-muted)">${drop.bars_elapsed||0}</td>
     `;
     tbody.appendChild(tr);
-
-    // Mobile card
-    let rsiBarColor = 'var(--accent-green)';
-    if(rsiNow>50) rsiBarColor='var(--accent-amber)';
-    if(rsiNow>70) rsiBarColor='var(--accent-red)';
-    const card = document.createElement('div');
-    card.className = 'mobile-card';
-    card.onclick = ()=>{selectDrop(drop,null);openDetail()};
-    card.innerHTML = `
-      <div class="mobile-card-top">
-        <div class="mobile-card-ticker">${drop.ticker}<span class="exchange-tag ${exClass}">${drop.exchange||''}</span></div>
-        <div class="mobile-card-badges">
-          <span class="div-badge ${divClass} ${isFlat?'flat':''}" style="font-size:9px;padding:2px 6px">${divLabel}</span>
-          <span class="status-badge ${drop.status}" style="font-size:9px;padding:2px 6px">${(drop.status||'').toUpperCase()}</span>
-        </div>
-      </div>
-      <div class="mobile-card-row">
-        <span><span class="mobile-card-label">RSI Now</span></span>
-        <span class="mobile-card-value" style="${rsiColor}">${rsiNow.toFixed?rsiNow.toFixed(1):rsiNow}</span>
-      </div>
-      <div class="mobile-card-row">
-        <span><span class="mobile-card-label">RSI Div</span> ${(drop.prev_rsi||0).toFixed?drop.prev_rsi.toFixed(1):drop.prev_rsi} → ${(drop.curr_rsi||0).toFixed?drop.curr_rsi.toFixed(1):drop.curr_rsi}</span>
-        <span class="mobile-card-label">${drop.date_detected||''}</span>
-      </div>
-      <div class="mobile-card-rsi-bar">
-        <div class="mobile-card-rsi-fill" style="width:${rsiNow}%;background:${rsiBarColor}"></div>
-        <div class="mobile-card-rsi-marker" style="left:${rsiNow}%"></div>
-      </div>
-    `;
-    mobileCards.appendChild(card);
   });
-}
-
-// Mobile functions
-function toggleFilters(){
-  document.querySelector('.panel-left').classList.toggle('open');
-}
-function openDetail(){
-  document.getElementById('panel-right').classList.add('open');
-}
-function closeDetail(){
-  document.getElementById('panel-right').classList.remove('open');
 }
 
 // Select drop
 function selectDrop(drop,tr){
   document.querySelectorAll('tbody tr').forEach(r=>r.classList.remove('selected'));
-  if(tr) tr.classList.add('selected');
+  tr.classList.add('selected');
   const isBull = drop.div_type.includes('bull');
   const rsiNow = drop.rsi_current||0;
   let rsiGaugeColor = 'var(--accent-green)';
